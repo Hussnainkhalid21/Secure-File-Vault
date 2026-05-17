@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure File Vault</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🔐</div>
+      <h1>Secure File Vault</h1>
+      <p>Cybersecurity Toolkit</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Features</div>
+
+      <button class="nav-btn" data-panel="panel-encrypt">
+        <span class="icon">🔒</span>
+        <span class="label">Encrypt File</span>
+      </button>
+
+      <button class="nav-btn" data-panel="panel-decrypt">
+        <span class="icon">🔓</span>
+        <span class="label">Decrypt File</span>
+      </button>
+
+      <button class="nav-btn" data-panel="panel-signature">
+        <span class="icon">✍</span>
+        <span class="label">Digital Signature</span>
+      </button>
+
+      <button class="nav-btn" data-panel="panel-hash">
+        <span class="icon">⬡</span>
+        <span class="label">Hash Generator</span>
+      </button>
+
+      <button class="nav-btn" data-panel="panel-integrity">
+        <span class="icon">🛡</span>
+        <span class="label">Integrity Checker</span>
+      </button>
+
+      <button class="nav-btn" data-panel="panel-compressed">
+        <span class="icon">📦</span>
+        <span class="label">Compressed File Checker</span>
+      </button>
+
+      <button class="nav-btn" data-panel="panel-obfuscated">
+        <span class="icon">🕵</span>
+        <span class="label">Obfuscated File Checker</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      AES-256-GCM · RSA-2048 · SHA-512
+    </div>
+  </aside>
+
+  <!-- ── Main Area ────────────────────────────────────────────────────────── -->
+  <div class="main">
+    <div class="topbar">
+      <h2 id="topbar-title">Encrypt File</h2>
+      <span class="badge">Secure File Vault v1.0</span>
+    </div>
+
+    <div class="content">
+
+      <!-- ══ 1. ENCRYPT ══════════════════════════════════════════════════════ -->
+      <div id="panel-encrypt" class="panel">
+        <div class="card">
+          <div class="card-title">🔒 File Encryption — AES-256-GCM</div>
+          <p class="text-muted" style="margin-bottom:20px">
+            Encrypts your file with military-grade AES-256-GCM. A random salt and nonce
+            are generated for every encryption — your password is never stored.
+          </p>
+
+          <form id="encrypt-form">
+            <div class="form-group">
+              <label>Select File (max 50 MB)</label>
+              <div class="file-drop">
+                <input type="file" name="file" required />
+                <div class="drop-icon">📄</div>
+                <div class="drop-text">Click or drag &amp; drop your file here</div>
+                <div class="drop-hint">Any file type is accepted</div>
+                <div class="file-name"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Encryption Password</label>
+              <input type="password" name="password" placeholder="Enter a strong password…" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <span class="icon">🔒</span> Encrypt File
+            </button>
+          </form>
+        </div>
+
+        <div id="encrypt-result" class="result-box"></div>
+      </div>
+
+      <!-- ══ 2. DECRYPT ══════════════════════════════════════════════════════ -->
+      <div id="panel-decrypt" class="panel">
+        <div class="card">
+          <div class="card-title">🔓 File Decryption — AES-256-GCM</div>
+          <p class="text-muted" style="margin-bottom:20px">
+            Upload an encrypted <code>.enc</code> file and enter the password used during
+            encryption. A wrong password will be clearly reported.
+          </p>
+
+          <form id="decrypt-form">
+            <div class="form-group">
+              <label>Encrypted File (.enc)</label>
+              <div class="file-drop">
+                <input type="file" name="file" accept=".enc" required />
+                <div class="drop-icon">🔐</div>
+                <div class="drop-text">Click or drag &amp; drop encrypted file</div>
+                <div class="drop-hint">Must be a file encrypted by this vault</div>
+                <div class="file-name"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Decryption Password</label>
+              <input type="password" name="password" placeholder="Enter the original password…" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <span class="icon">🔓</span> Decrypt File
+            </button>
+          </form>
+        </div>
+
+        <div id="decrypt-result" class="result-box"></div>
+      </div>
+
+      <!-- ══ 3. DIGITAL SIGNATURE ════════════════════════════════════════════ -->
+      <div id="panel-signature" class="panel">
+        <!-- Step 1 — Generate Keys -->
+        <div class="card">
+          <div class="card-title">🗝 Step 1 — Generate RSA-2048 Key Pair</div>
+          <p class="text-muted" style="margin-bottom:16px">
+            Generate a fresh RSA-2048 key pair. The keys are saved on the server in the
+            <code>keys/</code> folder and used for all subsequent sign/verify operations.
+          </p>
+          <button id="keygen-btn" class="btn btn-primary">⚙ Generate Keys</button>
+        </div>
+
+        <!-- Step 2 — Sign -->
+        <div class="card">
+          <div class="card-title">✍ Step 2 — Sign a File</div>
+          <p class="text-muted" style="margin-bottom:16px">
+            Signs the file using the stored private key. Share the output signature
+            (<code>.sig</code>) alongside the original file for later verification.
+          </p>
+          <form id="sign-form">
+            <div class="form-group">
+              <label>File to Sign</label>
+              <div class="file-drop">
+                <input type="file" name="file" required />
+                <div class="drop-icon">📄</div>
+                <div class="drop-text">Click or drag &amp; drop your file</div>
+                <div class="file-name"></div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">✍ Sign File</button>
+          </form>
+        </div>
+
+        <!-- Step 3 — Verify -->
+        <div class="card">
+          <div class="card-title">✅ Step 3 — Verify Signature</div>
+          <p class="text-muted" style="margin-bottom:16px">
+            Upload the original file and paste its Base64 signature to confirm it has
+            not been modified since signing.
+          </p>
+          <form id="verify-form">
+            <div class="form-group">
+              <label>Original File</label>
+              <div class="file-drop">
+                <input type="file" name="file" required />
+                <div class="drop-icon">📄</div>
+                <div class="drop-text">Click or drag &amp; drop file to verify</div>
+                <div class="file-name"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Signature (Base64)</label>
+              <textarea name="signature_b64" placeholder="Paste Base64 signature here…" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">✅ Verify Signature</button>
+          </form>
+        </div>
+
+        <div id="sig-result" class="result-box"></div>
+      </div>
+
+      <!-- ══ 4. HASH GENERATOR ═══════════════════════════════════════════════ -->
+      <div id="panel-hash" class="panel">
+        <div class="card">
+          <div class="card-title">⬡ Hash Generator — SHA-256 &amp; SHA-512</div>
+          <p class="text-muted" style="margin-bottom:20px">
+            Generate cryptographic fingerprints of any file. Use these hashes to verify
+            file authenticity or detect tampering.
+          </p>
+
+          <form id="hash-form">
+            <div class="form-group">
+              <label>Select File</label>
+              <div class="file-drop">
+                <input type="file" name="file" required />
+                <div class="drop-icon">📄</div>
+                <div class="drop-text">Click or drag &amp; drop your file</div>
+                <div class="drop-hint">Processed in chunks — large files are fine</div>
+                <div class="file-name"></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">⬡ Generate Hashes</button>
+          </form>
+        </div>
+
+        <div id="hash-result" class="result-box"></div>
+      </div>
+
+      <!-- ══ 5. INTEGRITY CHECKER ════════════════════════════════════════════ -->
+      <div id="panel-integrity" class="panel">
+        <div class="card">
+          <div class="card-title">🛡 File Integrity Checker</div>
+          <p class="text-muted" style="margin-bottom:20px">
+            Upload a file and provide its original hash (SHA-256 or SHA-512). The system
+            will recompute the hash and confirm whether the file is unmodified.
+          </p>
+
+          <form id="integrity-form">
+            <div class="form-group">
+              <label>File to Check</label>
+              <div class="file-drop">
+                <input type="file" name="file" required />
+                <div class="drop-icon">📄</div>
+                <div class="drop-text">Click or drag &amp; drop your file</div>
+                <div class="file-name"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Original Hash (SHA-256 or SHA-512)</label>
+              <input type="text" name="original_hash" placeholder="Paste the known-good hash here…" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary">🛡 Check Integrity</button>
+          </form>
+        </div>
+
+        <div id="integrity-result" class="result-box"></div>
+      </div>
+
+      <!-- ══ 6. COMPRESSED FILE CHECKER ════════════════════════════════════== -->
+      <div id="panel-compressed" class="panel">
+        <div class="card">
+          <div class="card-title">📦 Compressed File Checker</div>
+          <p class="text-muted" style="margin-bottom:20px">
+            Inspect ZIP or TAR archives without extracting them. Detects suspicious files,
+            double extensions, nested archives, and path-traversal attacks.
+            Files are <strong>never automatically extracted</strong>.
+          </p>
+
+          <form id="compressed-form">
+            <div class="form-group">
+              <label>Archive File (ZIP or TAR)</label>
+              <div class="file-drop">
+                <input type="file" name="file" accept=".zip,.tar,.tar.gz,.tgz,.tar.bz2,.gz" required />
+                <div class="drop-icon">📦</div>
+                <div class="drop-text">Click or drag &amp; drop archive</div>
+                <div class="drop-hint">Supported: .zip, .tar, .tar.gz, .tgz, .tar.bz2</div>
+                <div class="file-name"></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">🔍 Inspect Archive</button>
+          </form>
+        </div>
+
+        <div id="compressed-result" class="result-box"></div>
+      </div>
+
+      <!-- ══ 7. OBFUSCATED FILE CHECKER ══════════════════════════════════════ -->
+      <div id="panel-obfuscated" class="panel">
+        <div class="card">
+          <div class="card-title">🕵 Obfuscated File Checker</div>
+          <p class="text-muted" style="margin-bottom:20px">
+            Analyse a filename for common obfuscation techniques used by malware —
+            double extensions, RTLO tricks, hidden characters, and more.
+            You can type a filename directly or upload a file to use its name.
+          </p>
+
+          <form id="obfuscated-form">
+            <div class="form-group">
+              <label>Filename to Analyse (type directly)</label>
+              <input type="text" name="filename" placeholder="e.g. report.pdf.exe or invoice.docx" />
+            </div>
+
+            <p class="text-muted" style="margin: 8px 0; text-align:center; font-size:12px">— or upload a file to use its filename —</p>
+
+            <div class="form-group">
+              <div class="file-drop">
+                <input type="file" name="file" />
+                <div class="drop-icon">🕵</div>
+                <div class="drop-text">Click or drag &amp; drop (filename only is checked)</div>
+                <div class="drop-hint">The file content is not read — only its name</div>
+                <div class="file-name"></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">🔍 Analyse Filename</button>
+          </form>
+        </div>
+
+        <!-- Risk level reference -->
+        <div class="card">
+          <div class="card-title">Risk Level Reference</div>
+          <div class="flex gap-8 flex-wrap">
+            <span class="risk-badge risk-low">Low — Normal filename</span>
+            <span class="risk-badge risk-medium">Medium — Suspicious, scan first</span>
+            <span class="risk-badge risk-high">High — Do not open</span>
+          </div>
+        </div>
+
+        <div id="obfuscated-result" class="result-box"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script src="/static/js/script.js"></script>
+</body>
+</html>
